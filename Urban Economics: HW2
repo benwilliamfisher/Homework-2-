@@ -1,0 +1,106 @@
+library(haven)
+library(naniar)
+library(stargazer)
+
+# Import dataset
+LA_2010 <- read_dta("Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/LA_2010.dta")
+menlog <- read_dta("Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/French_Housing_Survey_2013/menlog.dta")
+menlog_comp <- read_dta("Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/French_Housing_Survey_2013/menlog_comp.dta")
+
+dataset <- merge(menlog,menlog_comp,by="idlog")
+
+table(menlog$lsy1)
+HLM <- dataset[!(dataset$lsy1=="2"),]
+HLM <- na.omit(HLM$lsy1)
+
+###############################################################################
+
+###############################################################################
+
+                              ### Question 1 ###
+
+# Regression to see if the filtering model holds 
+# Regress rent against the year the housing structure was constructed while controlling 
+# for where the structure is located, it's size and whether it is part of the HLM 
+# legislation (low-income housing)
+
+
+# DTL : housing type (1 - house; 2 - apartment; 3 - collocation)
+# HCHA : number of rooms 
+# IAAT : year of housing completion (1 before 1871 and 10 after 1999)
+# LSY1 : low-cost housing (1 if yes, 2 if no)
+# LLD : amount of the last rent paid 
+# DEP1 : region where the tenant lives 
+
+# Changing variable type and removing non-specific answers from type of housing and 0's from rent 
+HLM$iaat <- as.numeric(HLM$iaat)
+HLM$dep_idf <- as.numeric(HLM$dep_idf)
+HLM$dtl[HLM$dtl==4 | HLM$dtl==5]<-NA
+HLM$dtl <- as.numeric(HLM$dtl)
+HLM$lld[HLM$lld==0]<-NA
+
+# Regressions
+model1 <- lm(lld~iaat, data = HLM)
+model2 <- lm(lld~iaat+dtl+hcha+dep_idf, data = HLM)
+model3 <- lm(log(lld)~iaat, data = HLM)
+model4 <- lm(log(lld)~iaat+dtl+hcha+dep_idf, data = HLM)
+
+stargazer(model1, model2, model3, model4, 
+          title = "", 
+          dep.var.caption = "Amount of Last Rent Paid", 
+          covariate.labels = c("Antiquity of Building", "Type of Residency", "Number of Rooms", 
+                               "Region"), 
+          notes.label = "Significance Levels", 
+          type = "html", 
+          out = "~/Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/Regressions/question_1.htm")
+
+
+
+###############################################################################
+
+###############################################################################
+
+                        ### Question 2 ###
+
+# Regression to see if HLM tenants are more unemployed than similar non-HLM tenants 
+# control for other variables such as education, age, where the tenants are from and profession 
+
+# NAG: Age of the individual, as of December, 31, 2013 
+# NFONCTION : Individuals preoccupation 
+# NHATLEVEL : Highest level of education obtained 
+# DEP1 : region where the tenant lives 
+# LSY1 : low-cost housing (1 if yes, 0 if no)
+# DURCHO : How many months out of the last 12 have you been unemployed 
+
+dataset <- merge(individu,dataset,by= "idlog")
+
+# Change to type of variables 
+
+dataset$nfonction <- as.numeric(dataset$nfonction)
+dataset$dep_idf <- as.numeric(dataset$dep_idf)
+dataset$nhatlevel <- as.numeric(dataset$nhatlevel)
+
+# Create functional dummy variable for LSY1
+dataset$lsy1[dataset$lsy1==2]<-0
+dataset$lsy1 <- as.numeric(dataset$lsy1)
+
+# Regression
+model1 <- lm(rcho_n~lsy1, data = dataset)
+model2 <- lm(rcho_n~lsy1+nag+nfonction+nhatlevel+dep_idf, data = dataset)
+
+stargazer(model1, model2,  
+          title = "", 
+          dep.var.caption = "Months Unemployed in Past 12 Months", 
+          covariate.labels = c("Public Housing Tenant", "Age", "Profession", 
+                               "Education", "Region"), 
+          notes.label = "Significance Levels", 
+          type = "html", 
+          out = "~/Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/Regressions/question_2.htm")
+
+
+
+###############################################################################
+
+###############################################################################
+
+                              ### Question 3 ###
