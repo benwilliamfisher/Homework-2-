@@ -96,11 +96,75 @@ stargazer(model1, model2,
           notes.label = "Significance Levels", 
           type = "html", 
           out = "~/Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/Regressions/question_2.htm")
-
-
+                              
+                              
 
 ###############################################################################
 
 ###############################################################################
 
                               ### Question 3 ###
+
+# Why would public housing have a causal impact on unemployment? How could that be tested with the data at hand?
+
+# Public housing could have an impact on employment as companies usually require home address 
+# information from candidates and this could lead to biases from those hiring. As previous studies 
+# have shown, in many cases those who live in lower-income communities on average get less call backs 
+# from companies for job offers because of biases and preconceptions of workers from certain areas. 
+# With the data at hand you could use an instrumental variable since it is impossible to use difference 
+# in difference or regression discontinuity because you do not have a time component. 
+
+
+###############################################################################
+
+###############################################################################
+
+                              ### Question 4 ###
+
+# Compute dissimilarity and isolation indices (for one of the three specified ethnic groups) 
+# at the tract level and at the block level.
+
+# Dissimilation Index 
+
+block <- aggregate(cbind(black_pop,white_pop) ~ block_ID, data = LA_2010, sum)            
+tract <- aggregate(cbind(black_pop,white_pop) ~ tract_ID, data = LA_2010, sum)
+
+
+# Block ID
+attach(block)
+Y <- black_pop / sum(black_pop)
+X <- white_pop / sum(white_pop)
+detach(block)
+
+ID <- 0.5 * sum(abs(Y - X))
+round(ID,3)
+
+
+# Tract ID
+attach(tract)
+Y <- black_pop / sum(black_pop)
+X <- white_pop / sum(white_pop)
+detach(tract)
+
+ID <- 0.5 * sum(abs(Y - X))
+round(ID,3)
+
+# Isolation Index 
+
+# Block ID
+attach(block)
+Y <- black_pop/sum(black_pop) 
+X <- white_pop/sum(black_pop & white_pop)
+detach(block)
+
+II <- Y*X
+mean(II)
+
+# Tract ID
+attach(tract)
+Y <- black_pop/sum(black_pop) 
+X <- black_pop/sum(black_pop & white_pop)
+detach(tract)
+
+II <- Y*X
+mean(II)
