@@ -168,3 +168,56 @@ detach(tract)
 
 II <- Y*X
 mean(II)
+
+
+
+###############################################################################
+
+###############################################################################
+
+                            ### Question 5 ###
+
+
+black_tract_pop <- LA_2010 %>% 
+  group_by(tract_ID) %>% 
+  summarise_at(vars(black_pop),
+               list(name = sum))
+LA_2010 <- merge(LA_2010, black_tract_pop, by=c("tract_ID"), all=TRUE)
+names(LA_2010)[7]<-paste("black_tract_pop")
+
+
+white_tract_pop <- LA_2010 %>% 
+  group_by(tract_ID) %>% 
+  summarise_at(vars(white_pop),
+               list(name = sum))
+LA_2010 <- merge(LA_2010, white_tract_pop, by=c("tract_ID"), all=TRUE)
+names(LA_2010)[8]<-paste("white_tract_pop")
+
+
+# Dissimilarity Index 
+
+
+Y <- LA_2010$black_pop / LA_2010$black_tract_pop
+X <- LA_2010$white_pop / LA_2010$white_tract_pop
+
+LA_2010$ID_tract <- 0.5 * sum(abs(Y-X))
+
+
+# Regressions 
+
+# Creating Disimilarity Index per Tract
+LA_2010$ID_tract <- 0.5*abs((LA_2010$black_pop / LA_2010$black_tract_pop)-(LA_2010$white_pop / LA_2010$white_tract_pop))
+
+# Creating tract population variable 
+tract_pop <- LA_2010 %>% 
+  group_by(tract_ID) %>% 
+  summarise_at(vars(pop),
+               list(name = sum))
+LA_2010 <- merge(LA_2010, tract_pop, by=c("tract_ID"), all=TRUE)
+names(LA_2010)[10]<-paste("tract_pop")
+rm(black_tract_pop, white_tract_pop, tract_pop)
+
+# dissimilarity index <- tract + population + count of blocks in a tract
+
+model1 <- lm(ID_tract~tract_ID+tract_pop, data = LA_2010)
+summary(model1)
