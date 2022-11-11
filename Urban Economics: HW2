@@ -17,7 +17,7 @@ HLM <- na.omit(HLM$lsy1)
 
 ###############################################################################
 
-                              ### Question 1 ###
+### Question 1 ###
 
 # Regression to see if the filtering model holds 
 # Regress rent against the year the housing structure was constructed while controlling 
@@ -60,7 +60,7 @@ stargazer(model1, model2, model3, model4,
 
 ###############################################################################
 
-                        ### Question 2 ###
+### Question 2 ###
 
 # Regression to see if HLM tenants are more unemployed than similar non-HLM tenants 
 # control for other variables such as education, age, where the tenants are from and profession 
@@ -96,14 +96,14 @@ stargazer(model1, model2,
           notes.label = "Significance Levels", 
           type = "html", 
           out = "~/Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/Regressions/question_2.htm")
-                              
-                              
+
+
 
 ###############################################################################
 
 ###############################################################################
 
-                              ### Question 3 ###
+### Question 3 ###
 
 # Why would public housing have a causal impact on unemployment? How could that be tested with the data at hand?
 
@@ -119,7 +119,7 @@ stargazer(model1, model2,
 
 ###############################################################################
 
-                              ### Question 4 ###
+### Question 4 ###
 
 # Compute dissimilarity and isolation indices (for one of the three specified ethnic groups) 
 # at the tract level and at the block level.
@@ -175,11 +175,11 @@ mean(II)
 
 ###############################################################################
 
-                            ### Question 5 ###
+### Question 5 ###
 
 
-black_tract_pop <- LA_2010 %>% 
-  group_by(tract_ID) %>% 
+black_tract_pop <- LA_2010  %>%
+  group_by(tract_ID)  %>%
   summarise_at(vars(black_pop),
                list(name = sum))
 LA_2010 <- merge(LA_2010, black_tract_pop, by=c("tract_ID"), all=TRUE)
@@ -202,7 +202,6 @@ X <- LA_2010$white_pop / LA_2010$white_tract_pop
 
 LA_2010$ID_tract <- 0.5 * sum(abs(Y-X))
 
-
 # Regressions 
 
 # Creating Disimilarity Index per Tract
@@ -217,9 +216,16 @@ LA_2010 <- merge(LA_2010, tract_pop, by=c("tract_ID"), all=TRUE)
 names(LA_2010)[10]<-paste("tract_pop")
 rm(black_tract_pop, white_tract_pop, tract_pop)
 
+
+number_blocks <- LA_2010 %>% 
+  group_by(tract_ID) %>% 
+  summarise(block_ID = n())
+LA_2010 <- merge(LA_2010, number_blocks, by=c("tract_ID"), all=TRUE)
+names(LA_2010)[11]<-paste("Number_blocks")
+
 # dissimilarity index <- tract + population + count of blocks in a tract
 
-model1 <- lm(ID_tract~tract_ID+tract_pop, data = LA_2010)
+model1 <- lm(ID_tract~tract_ID+tract_pop+Number_blocks+tract_pop*Number_blocks, data = LA_2010)
 summary(model1)
 
 stargazer(model1, 
@@ -229,3 +235,4 @@ stargazer(model1,
           notes.label = "Significance Levels", 
           type = "html", 
           out = "~/Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/Regressions/question_5.htm")
+
