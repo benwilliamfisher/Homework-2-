@@ -221,3 +221,11 @@ rm(black_tract_pop, white_tract_pop, tract_pop)
 
 model1 <- lm(ID_tract~tract_ID+tract_pop, data = LA_2010)
 summary(model1)
+
+stargazer(model1, 
+          title = "", 
+          dep.var.caption = "Dissimilarity Index", 
+          covariate.labels = c("Tract ID", "Tract Population"), 
+          notes.label = "Significance Levels", 
+          type = "html", 
+          out = "~/Documents/Education/Ecole Polytechnique/Year 2/First Trimester/Urban Economics and Real Estate /Homework/HW2/Regressions/question_5.htm")
